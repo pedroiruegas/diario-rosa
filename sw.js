@@ -1,8 +1,11 @@
-const CACHE = 'diario-rosa-v1';
-const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
+const CACHE = 'diario-rosa-v2';
+const ASSETS = ['./', './index.html', './manifest.json', './capitulos.json',
+                './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  // si capitulos.json aún no existe, no truena la instalación
+  e.waitUntil(caches.open(CACHE).then(c =>
+    Promise.all(ASSETS.map(a => c.add(a).catch(() => {})))));
   self.skipWaiting();
 });
 
@@ -12,22 +15,25 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
-  if (e.request.method !== 'GET') return;
-  // La API de TMDB nunca se cachea: siempre datos frescos
-  if (url.hostname === 'api.themoviedb.org') return;
+function guardar(req, res){
+  if (res.ok) { const copia = res.clone(); caches.open(CACHE).then(c => c.put(req, copia)); }
+  return res;
+}
 
-  // Imágenes de TMDB y fuentes: caché primero, se guardan al verlas
-  if (url.hostname === 'image.tmdb.org' || url.hostname.includes('fonts.g')) {
-    e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
-      const copia = res.clone();
-      caches.open(CACHE).then(c => c.put(e.request, copia));
-      return res;
-    })));
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+
+  // Archivos de la app: red primero (siempre la versión nueva), caché si no hay internet
+  if (url.origin === self.location.origin) {
+    e.respondWith(fetch(e.request).then(r => guardar(e.request, r))
+      .catch(() => caches.match(e.request)));
     return;
   }
 
-  // Archivos de la app: caché primero, red si falta
-  e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request)));
+  // Imágenes de TMDB y fuentes: caché primero, se guardan al verlas
+  if (url.hostname === 'image.tmdb.org' || url.hostname.includes('fonts.g')) {
+    e.respondWith(caches.match(e.request).then(hit =>
+      hit || fetch(e.request).then(r => guardar(e.request, r))));
+  }
 });

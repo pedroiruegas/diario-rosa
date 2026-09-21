@@ -13,15 +13,15 @@ Un Letterboxd exclusivo para capítulos de **La Rosa de Guadalupe**. Busca capí
 - 💾 Respaldo de reseñas para copiar y restaurar
 - 📲 Instalable como app (PWA), sin tiendas
 
-## Cargar el catálogo completo
+## Actualizar el catálogo
 
-La app trae unos capítulos de muestra. Para las 18+ temporadas con sinopsis e imágenes:
+Los capítulos viven en `capitulos.json`. Para regenerarlo con lo más nuevo de TMDB:
 
-1. Crea una cuenta gratis en [themoviedb.org](https://www.themoviedb.org)
-2. Ve a Configuración → API y copia tu **API Key (v3)**
-3. En la app, entra a **Ajustes**, pega la llave y toca **Traer capítulos**
+```powershell
+$env:TMDB_KEY="tu_llave_v3"; node fetch-capitulos.mjs
+```
 
-La llave y tus reseñas se guardan solo en tu navegador.
+Luego haz commit y push del `capitulos.json` nuevo.
 
 ## Instalar en el celular
 

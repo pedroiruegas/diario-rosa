@@ -231,19 +231,6 @@ textarea{width:100%;min-height:104px;padding:12px;background:var(--vino);border:
   <!-- ============ AJUSTES ============ -->
   <section id="vista-ajustes" hidden>
     <div class="seccion">
-      <h3>Traer el catálogo completo</h3>
-      <p class="ayuda">
-        La app trae unos cuantos capítulos de muestra. Para cargar las 18 temporadas con sinopsis e
-        imágenes, pega tu llave de TMDB — se saca gratis en
-        <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">themoviedb.org</a>
-        (Configuración → API → API Key v3). Se guarda solo en este dispositivo.
-      </p>
-      <input id="llave" class="campo" type="password" placeholder="Llave de API v3" autocomplete="off">
-      <button class="btn" id="importar">Traer capítulos</button>
-      <p class="progreso" id="progreso"></p>
-    </div>
-
-    <div class="seccion">
       <h3>Respaldo de mis reseñas</h3>
       <p class="ayuda">Tus calificaciones viven en este navegador. Cópialas para no perderlas si cambias de teléfono.</p>
       <div class="fila" style="margin-top:0">
@@ -255,7 +242,7 @@ textarea{width:100%;min-height:104px;padding:12px;background:var(--vino);border:
 
     <div class="seccion">
       <h3>Empezar de cero</h3>
-      <p class="ayuda">Borra las calificaciones, reseñas y el catálogo importado de este dispositivo.</p>
+      <p class="ayuda">Borra tus calificaciones y reseñas de este dispositivo.</p>
       <button class="btn fantasma" id="borrar">Borrar todo</button>
     </div>
   </section>
@@ -303,12 +290,10 @@ textarea{width:100%;min-height:104px;padding:12px;background:var(--vino);border:
 <script>
 /* =========================================================
    Diario de la Rosa — app estática, sin servidor.
-   Datos: semilla local + importación opcional desde TMDB.
+   Datos: capitulos.json (generado con fetch-capitulos.mjs) o semilla local.
    Reseñas: localStorage de este navegador.
    ========================================================= */
 
-const SERIE_TMDB = 30826;          // La rosa de Guadalupe en TMDB
-const TEMPORADAS_MAX = 20;
 const IMG = "https://image.tmdb.org/t/p/w342";
 
 /* --- capítulos de muestra (datos reales verificables) --- */
@@ -331,7 +316,7 @@ const SEMILLA = [
 ];
 
 /* ---------------- almacenamiento ---------------- */
-const CLAVE_CAT = "rosa.catalogo", CLAVE_RES = "rosa.resenas", CLAVE_KEY = "rosa.llave";
+const CLAVE_RES = "rosa.resenas";
 
 function leer(clave, respaldo){
   try{ const v = localStorage.getItem(clave); return v ? JSON.parse(v) : respaldo; }
@@ -342,7 +327,7 @@ function escribir(clave, valor){
   catch(e){ avisar("No se pudo guardar: el navegador está lleno"); return false; }
 }
 
-let catalogo = leer(CLAVE_CAT, null) || SEMILLA.slice();
+let catalogo = SEMILLA.slice();
 let resenas  = leer(CLAVE_RES, {});
 let actual   = null;
 
@@ -469,9 +454,7 @@ function pintarCatalogo(){
 
   if(!lista.length){
     const v = nel("div","nada");
-    v.innerHTML = catalogo.length > SEMILLA.length || busqueda || filtro
-      ? "<h3>Nada por aquí</h3><p>Cambia la búsqueda o quita los filtros.</p>"
-      : "<h3>Nada por aquí</h3><p>Trae el catálogo completo desde Ajustes.</p>";
+    v.innerHTML = "<h3>Nada por aquí</h3><p>Cambia la búsqueda o quita los filtros.</p>";
     $("#vacio-catalogo").appendChild(v);
     return;
   }
@@ -509,7 +492,7 @@ function abrir(c){
 
   const sin = $("#ficha-sinopsis");
   const texto = c.o || c.n || "";
-  sin.textContent = texto || "Sin sinopsis todavía. Trae el catálogo completo desde Ajustes.";
+  sin.textContent = texto || "Este capítulo todavía no tiene sinopsis.";
   sin.classList.toggle("vacio", !texto);
 
   pintarEstrellas(r.cal || 0);
@@ -597,11 +580,12 @@ function pintarDiario(){
     <div class="dato"><b>${claves.filter(k=>resenas[k].fav).length}</b><span>favoritos</span></div>`;
 
   // distribución
+  const valores = [5,4.5,4,3.5,3,2.5,2,1.5,1,0.5];
   const cubos = {};
-  for(let v=0.5; v<=5; v+=0.5) cubos[v]=0;
+  valores.forEach(v => cubos[v] = 0);
   calificados.forEach(r=>{ if(cubos[r.cal]!==undefined) cubos[r.cal]++; });
   const tope = Math.max(1, ...Object.values(cubos));
-  $("#distribucion").innerHTML = Object.keys(cubos).reverse().map(v=>`
+  $("#distribucion").innerHTML = valores.map(v=>`
     <div class="barra">
       <span style="width:44px;color:var(--oro)">${estrellasTexto(+v)}</span>
       <span class="riel"><span class="relleno" style="width:${cubos[v]/tope*100}%"></span></span>
@@ -637,58 +621,6 @@ function pintarDiario(){
   }
 }
 
-/* ---------------- importar de TMDB ---------------- */
-$("#llave").value = leer(CLAVE_KEY, "") || "";
-
-$("#importar").addEventListener("click", async ()=>{
-  const llave = $("#llave").value.trim();
-  const p = $("#progreso");
-  if(!llave){ p.textContent = "Falta la llave de API."; return; }
-  escribir(CLAVE_KEY, llave);
-
-  const btn = $("#importar");
-  btn.disabled = true; btn.textContent = "Trayendo…";
-  const nuevos = [];
-  try{
-    for(let s=1; s<=TEMPORADAS_MAX; s++){
-      p.textContent = `Temporada ${s}… (${nuevos.length} capítulos)`;
-      const url = `https://api.themoviedb.org/3/tv/${SERIE_TMDB}/season/${s}?language=es-MX&api_key=${encodeURIComponent(llave)}`;
-      let res;
-      try{ res = await fetch(url); }
-      catch(err){ throw new Error("red"); }
-      if(res.status === 401) throw new Error("llave");
-      if(!res.ok) continue;                       // temporada inexistente
-      const datos = await res.json();
-      (datos.episodes || []).forEach(ep=>{
-        nuevos.push({
-          s, e: ep.episode_number,
-          t: (ep.name || `Capítulo ${ep.episode_number}`).trim(),
-          o: (ep.overview || "").trim(),
-          d: ep.air_date || "",
-          img: ep.still_path || ""
-        });
-      });
-    }
-    if(!nuevos.length){ p.textContent = "TMDB no devolvió capítulos. Revisa la llave."; return; }
-
-    // conserva las notas de la semilla si el capítulo coincide
-    const notas = {}; SEMILLA.forEach(c => { if(c.n) notas[id(c)] = c.n; });
-    nuevos.forEach(c => { if(notas[id(c)]) c.n = notas[id(c)]; });
-
-    catalogo = nuevos;
-    escribir(CLAVE_CAT, catalogo);
-    llenarTemporadas(); pintarCatalogo();
-    p.textContent = `Listo: ${nuevos.length} capítulos guardados.`;
-    avisar(`${nuevos.length} capítulos cargados`);
-  }catch(err){
-    p.textContent = err.message === "llave"
-      ? "La llave no es válida. Revísala en tu cuenta de TMDB."
-      : "No se pudo conectar con TMDB. Esto funciona al abrir la app desde tu propio sitio, no desde la vista previa.";
-  }finally{
-    btn.disabled = false; btn.textContent = "Traer capítulos";
-  }
-});
-
 /* ---------------- respaldo ---------------- */
 $("#exportar").addEventListener("click", ()=>{
   $("#respaldo").value = JSON.stringify(resenas);
@@ -707,15 +639,28 @@ $("#pegar").addEventListener("click", ()=>{
   }catch(e){ avisar("Ese texto no es un respaldo válido"); }
 });
 $("#borrar").addEventListener("click", ()=>{
-  if(!confirm("¿Borrar todas tus calificaciones y el catálogo importado?")) return;
-  [CLAVE_CAT, CLAVE_RES].forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
-  resenas = {}; catalogo = SEMILLA.slice();
-  llenarTemporadas(); pintarCatalogo(); avisar("Todo borrado");
+  if(!confirm("¿Borrar todas tus calificaciones y reseñas?")) return;
+  try{ localStorage.removeItem(CLAVE_RES); }catch(e){}
+  resenas = {};
+  pintarCatalogo(); avisar("Todo borrado");
 });
 
 /* ---------------- arranque ---------------- */
-llenarTemporadas();
-pintarCatalogo();
+async function cargarCatalogo(){
+  llenarTemporadas(); pintarCatalogo();          // muestra la semilla al instante
+  try{
+    const res = await fetch("capitulos.json");
+    if(!res.ok) return;
+    const datos = await res.json();
+    if(!Array.isArray(datos) || !datos.length) return;
+    const notas = {};
+    SEMILLA.forEach(c => { if(c.n) notas[id(c)] = c.n; });
+    datos.forEach(c => { if(notas[id(c)]) c.n = notas[id(c)]; });
+    catalogo = datos;
+    llenarTemporadas(); pintarCatalogo();
+  }catch(e){ /* sin catálogo: se queda la semilla */ }
+}
+cargarCatalogo();
 
 /* ---------------- PWA ---------------- */
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
