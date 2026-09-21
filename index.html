@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diario de la Rosa</title>
+<meta name="theme-color" content="#2A0E1B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --vino:#2A0E1B;
+  --vino-2:#3B1528;
+  --vino-3:#4E1D34;
+  --rosa:#E8467C;
+  --oro:#F2C14E;
+  --crema:#F7EDE8;
+  --tenue:#C69BAE;
+  --linea:rgba(247,237,232,.14);
+  --radio:14px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #5A2340 0%, transparent 60%),
+    var(--vino);
+  color:var(--crema);
+  font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:16px;line-height:1.5;
+  min-height:100%;
+}
+h1,h2,h3{font-family:"Fraunces",Georgia,"Times New Roman",serif;font-weight:600;margin:0;line-height:1.15}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--rosa);outline-offset:2px;border-radius:6px}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 96px}
+
+/* ---------- encabezado ---------- */
+header{padding:22px 0 10px;text-align:center}
+.marca{display:flex;align-items:center;justify-content:center;gap:10px}
+.marca h1{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.marca svg{width:26px;height:26px;flex:0 0 auto}
+.lema{color:var(--tenue);font-size:13.5px;margin-top:4px}
+
+/* ---------- pestañas ---------- */
+nav{display:flex;gap:4px;justify-content:center;margin:16px 0 18px;border-bottom:1px solid var(--linea)}
+nav button{padding:9px 14px;color:var(--tenue);border-bottom:2px solid transparent;margin-bottom:-1px;font-size:15px}
+nav button[aria-selected="true"]{color:var(--crema);border-bottom-color:var(--rosa)}
+
+/* ---------- buscador ---------- */
+.buscador{position:relative;margin-bottom:10px}
+.buscador input{
+  width:100%;padding:13px 14px 13px 42px;background:var(--vino-2);
+  border:1px solid var(--linea);border-radius:999px;font-size:16px;
+}
+.buscador input::placeholder{color:var(--tenue)}
+.buscador svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:17px;height:17px;opacity:.6}
+.filtros{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;-webkit-overflow-scrolling:touch}
+.filtros::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:7px 13px;border:1px solid var(--linea);border-radius:999px;font-size:13.5px;color:var(--tenue);background:var(--vino-2)}
+.chip[aria-pressed="true"]{background:var(--rosa);border-color:var(--rosa);color:#fff}
+select.chip{appearance:none;padding-right:26px;background-image:linear-gradient(45deg,transparent 50%,var(--tenue) 50%),linear-gradient(135deg,var(--tenue) 50%,transparent 50%);background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.conteo{color:var(--tenue);font-size:13px;margin:2px 0 14px}
+
+/* ---------- rejilla ---------- */
+.rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:14px}
+.carta{text-align:left;width:100%;display:block}
+.lamina{
+  position:relative;aspect-ratio:2/3;border-radius:var(--radio);overflow:hidden;
+  border:1px solid var(--linea);display:grid;place-items:center;padding:14px;
+}
+.lamina img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lamina .rotulo{
+  position:relative;font-family:"Fraunces",serif;font-size:17px;line-height:1.2;
+  text-align:center;text-wrap:balance;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.5)
+}
+.lamina .marcoep{
+  position:absolute;top:8px;left:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+  padding:3px 7px;border-radius:6px;font-size:11px;letter-spacing:.03em
+}
+.lamina .cinta{position:absolute;top:8px;right:8px;font-size:14px}
+.carta h3{font-size:14.5px;margin-top:8px;font-family:"DM Sans",sans-serif;font-weight:500;line-height:1.3}
+.carta .pie{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:12.5px;color:var(--tenue)}
+.mini{color:var(--oro);letter-spacing:1px;font-size:12.5px}
+
+/* ---------- ficha ---------- */
+.telon{position:fixed;inset:0;background:rgba(10,3,7,.72);backdrop-filter:blur(3px);z-index:40;display:none}
+.telon.abierto{display:block}
+.ficha{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;max-height:92vh;overflow-y:auto;
+  background:var(--vino-2);border-top-left-radius:22px;border-top-right-radius:22px;
+  border-top:1px solid var(--linea);transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.3,1);
+  padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));
+}
+.ficha.abierta{transform:translateY(0)}
+@media (prefers-reduced-motion:reduce){.ficha{transition:none}}
+@media(min-width:720px){
+  .ficha{left:50%;right:auto;bottom:auto;top:50%;width:620px;max-height:86vh;border-radius:20px;border:1px solid var(--linea);transform:translate(-50%,-44%) scale(.97);opacity:0;pointer-events:none}
+  .ficha.abierta{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+}
+.asa{width:38px;height:4px;background:var(--linea);border-radius:99px;margin:10px auto 0}
+.ficha-cuerpo{padding:16px 20px 0}
+.ficha .sinopsis{color:#E5D3DC;font-size:15px;margin:12px 0 0}
+.ficha .vacio{color:var(--tenue);font-style:italic}
+.ficha h2{font-size:25px;margin-top:6px;text-wrap:balance}
+.meta{color:var(--tenue);font-size:13px;margin-top:5px}
+.escena{aspect-ratio:16/9;border-radius:12px;overflow:hidden;position:relative;display:grid;place-items:center;padding:16px;border:1px solid var(--linea)}
+.escena img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.escena .rotulo{position:relative;font-family:"Fraunces",serif;font-size:22px;text-align:center;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55)}
+
+.bloque{border-top:1px solid var(--linea);margin-top:18px;padding-top:16px}
+.bloque h3{font-size:15px;font-family:"DM Sans",sans-serif;font-weight:700;margin-bottom:10px}
+.estrellas{display:flex;gap:2px}
+.estrellas button{position:relative;width:38px;height:38px;padding:0}
+.estrellas svg{width:34px;height:34px;display:block}
+.acciones{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.pastilla{display:flex;align-items:center;gap:7px;padding:9px 14px;border:1px solid var(--linea);border-radius:999px;font-size:14px;background:var(--vino-3)}
+.pastilla[aria-pressed="true"]{background:var(--rosa);border-color:var(--rosa);color:#fff}
+textarea{width:100%;min-height:104px;padding:12px;background:var(--vino);border:1px solid var(--linea);border-radius:12px;resize:vertical;font-size:15px}
+.fila{display:flex;gap:10px;margin-top:12px}
+.btn{flex:1;padding:12px;border-radius:12px;background:var(--rosa);color:#fff;font-weight:700;text-align:center}
+.btn.fantasma{background:transparent;border:1px solid var(--linea);color:var(--tenue);font-weight:500;flex:0 0 auto;padding:12px 16px}
+
+/* ---------- diario / ajustes ---------- */
+.tarjetas{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px}
+.dato{background:var(--vino-2);border:1px solid var(--linea);border-radius:var(--radio);padding:14px}
+.dato b{display:block;font-family:"Fraunces",serif;font-size:29px;font-weight:600;line-height:1}
+.dato span{color:var(--tenue);font-size:12.5px}
+.barra{display:flex;align-items:center;gap:9px;margin-bottom:6px;font-size:12.5px;color:var(--tenue)}
+.barra .riel{flex:1;height:9px;background:var(--vino-2);border-radius:99px;overflow:hidden}
+.barra .relleno{height:100%;background:var(--oro);border-radius:99px}
+.lista-diario{display:flex;flex-direction:column;gap:10px}
+.entrada{display:flex;gap:12px;background:var(--vino-2);border:1px solid var(--linea);border-radius:var(--radio);padding:12px;text-align:left;width:100%;align-items:flex-start}
+.entrada .cuadro{width:52px;height:78px;border-radius:8px;flex:0 0 auto;overflow:hidden;position:relative}
+.entrada .cuadro img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.entrada p{margin:6px 0 0;font-size:13.5px;color:#E5D3DC;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.campo{width:100%;padding:12px;background:var(--vino-2);border:1px solid var(--linea);border-radius:12px;font-size:15px;margin-bottom:10px}
+.ayuda{color:var(--tenue);font-size:13.5px;margin:6px 0 14px}
+.ayuda a{color:var(--rosa)}
+.seccion{background:var(--vino-2);border:1px solid var(--linea);border-radius:var(--radio);padding:16px;margin-bottom:14px}
+.seccion h3{font-size:16px;margin-bottom:8px}
+.progreso{font-size:13.5px;color:var(--oro);margin-top:10px;min-height:20px}
+.nada{text-align:center;color:var(--tenue);padding:44px 20px}
+.nada h3{font-size:19px;margin-bottom:6px;color:var(--crema)}
+
+/* ---------- aviso y pétalo ---------- */
+#aviso{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom,0px));background:#fff;color:var(--vino);padding:11px 18px;border-radius:999px;font-size:14px;font-weight:500;z-index:80;opacity:0;pointer-events:none;transition:opacity .2s}
+#aviso.visible{opacity:1}
+#petalo{position:fixed;inset:0;z-index:90;pointer-events:none;display:none;place-items:center}
+#petalo.vuela{display:grid}
+#petalo svg{width:120px;height:120px;animation:viento 1.1s ease-out forwards}
+@keyframes viento{
+  0%{opacity:0;transform:translate(-40px,26px) rotate(-22deg) scale(.7)}
+  35%{opacity:1}
+  100%{opacity:0;transform:translate(60px,-120px) rotate(18deg) scale(1.15)}
+}
+@media (prefers-reduced-motion:reduce){#petalo svg{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="marca">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 21c0-5 2-8 6-9-4-1-6-4-6-9 0 5-2 8-6 9 4 1 6 4 6 9Z" fill="#fff"/>
+        <circle cx="12" cy="12" r="2.6" fill="#E8467C"/>
+      </svg>
+      <h1>Diario de la Rosa</h1>
+    </div>
+    <p class="lema">Tu registro de capítulos de La Rosa de Guadalupe</p>
+  </header>
+
+  <nav role="tablist">
+    <button role="tab" id="tab-catalogo" aria-selected="true" data-vista="catalogo">Capítulos</button>
+    <button role="tab" id="tab-diario" aria-selected="false" data-vista="diario">Mi diario</button>
+    <button role="tab" id="tab-ajustes" aria-selected="false" data-vista="ajustes">Ajustes</button>
+  </nav>
+
+  <!-- ============ CATÁLOGO ============ -->
+  <section id="vista-catalogo">
+    <div class="buscador">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+      </svg>
+      <input id="q" type="search" placeholder="Buscar por título o sinopsis" autocomplete="off">
+    </div>
+
+    <div class="filtros">
+      <select id="temporada" class="chip" aria-label="Temporada"><option value="">Todas las temporadas</option></select>
+      <button class="chip" data-filtro="vistos" aria-pressed="false">Vistos</button>
+      <button class="chip" data-filtro="pendientes" aria-pressed="false">Por ver</button>
+      <button class="chip" data-filtro="favoritos" aria-pressed="false">Favoritos</button>
+      <button class="chip" data-filtro="resena" aria-pressed="false">Con reseña</button>
+      <select id="orden" class="chip" aria-label="Orden">
+        <option value="orden">Orden de emisión</option>
+        <option value="titulo">Título A-Z</option>
+        <option value="mia">Mi calificación</option>
+        <option value="reciente">Calificados hace poco</option>
+      </select>
+    </div>
+
+    <p class="conteo" id="conteo"></p>
+    <div class="rejilla" id="rejilla"></div>
+    <div id="vacio-catalogo"></div>
+  </section>
+
+  <!-- ============ DIARIO ============ -->
+  <section id="vista-diario" hidden>
+    <div class="tarjetas" id="tarjetas"></div>
+    <div class="seccion">
+      <h3>Cómo califico</h3>
+      <div id="distribucion"></div>
+    </div>
+    <h3 style="margin:22px 0 12px;font-size:18px">Últimas entradas</h3>
+    <div class="lista-diario" id="lista-diario"></div>
+  </section>
+
+  <!-- ============ AJUSTES ============ -->
+  <section id="vista-ajustes" hidden>
+    <div class="seccion">
+      <h3>Traer el catálogo completo</h3>
+      <p class="ayuda">
+        La app trae unos cuantos capítulos de muestra. Para cargar las 18 temporadas con sinopsis e
+        imágenes, pega tu llave de TMDB — se saca gratis en
+        <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">themoviedb.org</a>
+        (Configuración → API → API Key v3). Se guarda solo en este dispositivo.
+      </p>
+      <input id="llave" class="campo" type="password" placeholder="Llave de API v3" autocomplete="off">
+      <button class="btn" id="importar">Traer capítulos</button>
+      <p class="progreso" id="progreso"></p>
+    </div>
+
+    <div class="seccion">
+      <h3>Respaldo de mis reseñas</h3>
+      <p class="ayuda">Tus calificaciones viven en este navegador. Cópialas para no perderlas si cambias de teléfono.</p>
+      <div class="fila" style="margin-top:0">
+        <button class="btn fantasma" id="exportar" style="flex:1">Ver mi respaldo</button>
+        <button class="btn fantasma" id="pegar" style="flex:1">Restaurar respaldo</button>
+      </div>
+      <textarea id="respaldo" placeholder="Aquí aparece el respaldo. Para restaurar, pega uno y toca Restaurar." style="margin-top:12px"></textarea>
+    </div>
+
+    <div class="seccion">
+      <h3>Empezar de cero</h3>
+      <p class="ayuda">Borra las calificaciones, reseñas y el catálogo importado de este dispositivo.</p>
+      <button class="btn fantasma" id="borrar">Borrar todo</button>
+    </div>
+  </section>
+</div>
+
+<div class="telon" id="telon"></div>
+
+<!-- ============ FICHA ============ -->
+<div class="ficha" id="ficha" role="dialog" aria-modal="true" aria-labelledby="ficha-titulo">
+  <div class="asa"></div>
+  <div class="ficha-cuerpo">
+    <div class="escena" id="escena"></div>
+    <h2 id="ficha-titulo"></h2>
+    <p class="meta" id="ficha-meta"></p>
+    <p class="sinopsis" id="ficha-sinopsis"></p>
+
+    <div class="bloque">
+      <h3>Mi calificación</h3>
+      <div class="estrellas" id="estrellas"></div>
+      <div class="acciones">
+        <button class="pastilla" id="btn-visto" aria-pressed="false">Ya lo vi</button>
+        <button class="pastilla" id="btn-fav" aria-pressed="false">Favorito</button>
+      </div>
+    </div>
+
+    <div class="bloque">
+      <h3>Mi reseña</h3>
+      <textarea id="texto" placeholder="¿Qué te dejó este capítulo?"></textarea>
+      <div class="fila">
+        <button class="btn" id="guardar">Guardar</button>
+        <button class="btn fantasma" id="quitar">Quitar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="aviso" role="status"></div>
+<div id="petalo" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M12 21c0-5 2-8 6-9-4-1-6-4-6-9 0 5-2 8-6 9 4 1 6 4 6 9Z" fill="#fff"/>
+    <circle cx="12" cy="12" r="2.6" fill="#E8467C"/>
+  </svg>
+</div>
+
+<script>
+/* =========================================================
+   Diario de la Rosa — app estática, sin servidor.
+   Datos: semilla local + importación opcional desde TMDB.
+   Reseñas: localStorage de este navegador.
+   ========================================================= */
+
+const SERIE_TMDB = 30826;          // La rosa de Guadalupe en TMDB
+const TEMPORADAS_MAX = 20;
+const IMG = "https://image.tmdb.org/t/p/w342";
+
+/* --- capítulos de muestra (datos reales verificables) --- */
+const SEMILLA = [
+  {s:1,e:1,t:"Mi hija vive",d:"2008-02-05",n:"Primer capítulo de la serie; todavía sin el viento característico."},
+  {s:1,e:3,t:"El amor toca a mi puerta",d:"2008-02-07",n:"Especial de San Valentín."},
+  {s:1,e:11,t:"Una mirada",d:"2008-02-19",n:"Especial de Semana Santa."},
+  {s:1,e:26,t:"La maestra Estelita",d:"2008-03-11",n:"Especial del Día del Maestro."},
+  {s:1,e:45,t:"Salida de emergencia",d:"2008-04-07",n:"Inspirado en la tragedia del News Divine."},
+  {s:1,e:65,t:"El cielo es azul",d:"2008-05-05",n:"Inspirado en el caso Fritzl."},
+  {s:1,e:79,t:"Una nueva luz",d:"2008-05-23",n:"Especial de Navidad."},
+  {s:1,e:80,t:"Noche de amor",d:"2008-05-26",n:"Especial de Navidad."},
+  {s:1,e:81,t:"Empezar bien",d:"2008-05-27",n:"Especial de fin de año."},
+  {s:6,e:47,t:"La venganza",d:"2013-04-01",n:""},
+  {s:7,e:12,t:"El novio de mi mejor amiga",d:"2014-02-24",n:""},
+  {s:15,e:1,t:"Flor de otoño",d:"2021-01-11",n:"Sobre el climaterio."},
+  {s:15,e:12,t:"Un lugar feliz",d:"2021-01-26",n:"Sobre el regreso a clases presenciales."},
+  {s:15,e:13,t:"De color rosa",d:"2021-01-27",n:""},
+  {s:15,e:14,t:"Promesa de amor",d:"2021-01-28",n:""}
+];
+
+/* ---------------- almacenamiento ---------------- */
+const CLAVE_CAT = "rosa.catalogo", CLAVE_RES = "rosa.resenas", CLAVE_KEY = "rosa.llave";
+
+function leer(clave, respaldo){
+  try{ const v = localStorage.getItem(clave); return v ? JSON.parse(v) : respaldo; }
+  catch(e){ return respaldo; }
+}
+function escribir(clave, valor){
+  try{ localStorage.setItem(clave, JSON.stringify(valor)); return true; }
+  catch(e){ avisar("No se pudo guardar: el navegador está lleno"); return false; }
+}
+
+let catalogo = leer(CLAVE_CAT, null) || SEMILLA.slice();
+let resenas  = leer(CLAVE_RES, {});
+let actual   = null;
+
+const id = c => c.s + "x" + c.e;
+
+/* ---------------- utilidades ---------------- */
+const $ = s => document.querySelector(s);
+const nel = (t,c) => { const e=document.createElement(t); if(c) e.className=c; return e; };
+
+function avisar(msg){
+  const a = $("#aviso");
+  a.textContent = msg; a.classList.add("visible");
+  clearTimeout(avisar.t);
+  avisar.t = setTimeout(()=>a.classList.remove("visible"), 1900);
+}
+function soltarPetalo(){
+  const p = $("#petalo");
+  p.classList.remove("vuela"); void p.offsetWidth; p.classList.add("vuela");
+  setTimeout(()=>p.classList.remove("vuela"), 1200);
+}
+function tono(txt){
+  let h=0; for(let i=0;i<txt.length;i++) h=(h*31+txt.charCodeAt(i))>>>0;
+  return h;
+}
+function degradado(c){
+  const h = tono(c.t);
+  const a = 320 + (h % 40), b = 350 + (h>>5) % 50;
+  return `linear-gradient(150deg, hsl(${a} 55% 28%), hsl(${b % 360} 48% 16%))`;
+}
+function estrellasTexto(v){
+  if(!v) return "";
+  return "★".repeat(Math.floor(v)) + (v % 1 ? "½" : "");
+}
+function fecha(d){
+  if(!d) return "";
+  const [a,m,dd] = d.split("-");
+  const meses = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  return `${+dd} ${meses[+m-1]} ${a}`;
+}
+
+/* ---------------- pestañas ---------------- */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener("click", ()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.setAttribute("aria-selected", x===b));
+    ["catalogo","diario","ajustes"].forEach(v=>{
+      $("#vista-"+v).hidden = (v !== b.dataset.vista);
+    });
+    if(b.dataset.vista === "diario") pintarDiario();
+    window.scrollTo({top:0});
+  });
+});
+
+/* ---------------- filtros ---------------- */
+let filtro = "", busqueda = "", temporada = "", orden = "orden";
+
+$("#q").addEventListener("input", e => { busqueda = e.target.value.trim().toLowerCase(); pintarCatalogo(); });
+$("#temporada").addEventListener("change", e => { temporada = e.target.value; pintarCatalogo(); });
+$("#orden").addEventListener("change", e => { orden = e.target.value; pintarCatalogo(); });
+document.querySelectorAll('.chip[data-filtro]').forEach(b=>{
+  b.addEventListener("click", ()=>{
+    const nuevo = b.dataset.filtro;
+    filtro = (filtro === nuevo) ? "" : nuevo;
+    document.querySelectorAll('.chip[data-filtro]').forEach(x=>x.setAttribute("aria-pressed", x.dataset.filtro===filtro));
+    pintarCatalogo();
+  });
+});
+
+function llenarTemporadas(){
+  const sel = $("#temporada");
+  const nums = [...new Set(catalogo.map(c=>c.s))].sort((a,b)=>a-b);
+  sel.innerHTML = '<option value="">Todas las temporadas</option>' +
+    nums.map(n=>`<option value="${n}">Temporada ${n}</option>`).join("");
+  sel.value = temporada;
+}
+
+function filtrar(){
+  let lista = catalogo.filter(c=>{
+    if(temporada && String(c.s) !== temporada) return false;
+    if(busqueda){
+      const heno = (c.t + " " + (c.o||"") + " " + (c.n||"")).toLowerCase();
+      if(!heno.includes(busqueda)) return false;
+    }
+    const r = resenas[id(c)];
+    if(filtro === "vistos")     return !!(r && r.visto);
+    if(filtro === "pendientes") return !(r && r.visto);
+    if(filtro === "favoritos")  return !!(r && r.fav);
+    if(filtro === "resena")     return !!(r && r.txt);
+    return true;
+  });
+
+  const cal = c => (resenas[id(c)] || {}).cal || 0;
+  const cuando = c => (resenas[id(c)] || {}).cuando || 0;
+  if(orden === "titulo")   lista.sort((a,b)=>a.t.localeCompare(b.t,"es"));
+  else if(orden === "mia") lista.sort((a,b)=>cal(b)-cal(a) || a.s-b.s || a.e-b.e);
+  else if(orden === "reciente") lista.sort((a,b)=>cuando(b)-cuando(a));
+  else lista.sort((a,b)=>a.s-b.s || a.e-b.e);
+  return lista;
+}
+
+/* ---------------- rejilla ---------------- */
+function lamina(c, alto){
+  const caja = nel("div", alto ? "escena" : "lamina");
+  caja.style.background = degradado(c);
+  if(c.img){
+    const im = new Image();
+    im.loading = "lazy"; im.decoding = "async"; im.alt = "";
+    im.src = IMG + c.img;
+    im.onerror = () => im.remove();
+    caja.appendChild(im);
+  }
+  const rot = nel("div","rotulo"); rot.textContent = c.t; caja.appendChild(rot);
+  return caja;
+}
+
+function pintarCatalogo(){
+  const lista = filtrar();
+  const rejilla = $("#rejilla");
+  rejilla.innerHTML = "";
+  $("#vacio-catalogo").innerHTML = "";
+
+  $("#conteo").textContent = lista.length
+    ? `${lista.length} ${lista.length===1?"capítulo":"capítulos"}`
+    : "";
+
+  if(!lista.length){
+    const v = nel("div","nada");
+    v.innerHTML = catalogo.length > SEMILLA.length || busqueda || filtro
+      ? "<h3>Nada por aquí</h3><p>Cambia la búsqueda o quita los filtros.</p>"
+      : "<h3>Nada por aquí</h3><p>Trae el catálogo completo desde Ajustes.</p>";
+    $("#vacio-catalogo").appendChild(v);
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+  for(const c of lista){
+    const r = resenas[id(c)] || {};
+    const b = nel("button","carta");
+    const lam = lamina(c,false);
+    const ep = nel("div","marcoep"); ep.textContent = `T${c.s} · E${c.e}`; lam.appendChild(ep);
+    if(r.fav){ const h = nel("div","cinta"); h.textContent = "🌹"; lam.appendChild(h); }
+    b.appendChild(lam);
+    const h3 = nel("h3"); h3.textContent = c.t; b.appendChild(h3);
+    const pie = nel("div","pie");
+    if(r.cal){ const s = nel("span","mini"); s.textContent = estrellasTexto(r.cal); pie.appendChild(s); }
+    else if(r.visto){ pie.appendChild(document.createTextNode("Visto")); }
+    else { pie.appendChild(document.createTextNode(fecha(c.d) || "Sin calificar")); }
+    b.appendChild(pie);
+    b.addEventListener("click", ()=>abrir(c));
+    frag.appendChild(b);
+  }
+  rejilla.appendChild(frag);
+}
+
+/* ---------------- ficha ---------------- */
+function abrir(c){
+  actual = c;
+  const r = resenas[id(c)] || {};
+
+  const escena = $("#escena");
+  escena.replaceWith(Object.assign(lamina(c,true), {id:"escena"}));
+
+  $("#ficha-titulo").textContent = c.t;
+  $("#ficha-meta").textContent = [`Temporada ${c.s}, capítulo ${c.e}`, fecha(c.d)].filter(Boolean).join(" · ");
+
+  const sin = $("#ficha-sinopsis");
+  const texto = c.o || c.n || "";
+  sin.textContent = texto || "Sin sinopsis todavía. Trae el catálogo completo desde Ajustes.";
+  sin.classList.toggle("vacio", !texto);
+
+  pintarEstrellas(r.cal || 0);
+  $("#btn-visto").setAttribute("aria-pressed", !!r.visto);
+  $("#btn-fav").setAttribute("aria-pressed", !!r.fav);
+  $("#texto").value = r.txt || "";
+
+  $("#telon").classList.add("abierto");
+  $("#ficha").classList.add("abierta");
+  $("#ficha").scrollTop = 0;
+  document.body.style.overflow = "hidden";
+}
+function cerrar(){
+  $("#telon").classList.remove("abierto");
+  $("#ficha").classList.remove("abierta");
+  document.body.style.overflow = "";
+  actual = null;
+}
+$("#telon").addEventListener("click", cerrar);
+document.addEventListener("keydown", e => { if(e.key === "Escape" && actual) cerrar(); });
+
+/* --- estrellas de media en media --- */
+let calTmp = 0;
+function pintarEstrellas(v){
+  calTmp = v;
+  const cont = $("#estrellas");
+  cont.innerHTML = "";
+  for(let i=1;i<=5;i++){
+    const b = nel("button");
+    const lleno = v >= i, medio = !lleno && v >= i-0.5;
+    b.setAttribute("aria-label", `${i} ${i===1?"estrella":"estrellas"}`);
+    b.innerHTML = `<svg viewBox="0 0 24 24">
+      <defs><linearGradient id="g${i}"><stop offset="50%" stop-color="#F2C14E"/><stop offset="50%" stop-color="rgba(247,237,232,.22)"/></linearGradient></defs>
+      <path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.4-5.8-3-5.8 3 1.1-6.4L2.6 9.4l6.5-.9z"
+        fill="${lleno ? "#F2C14E" : medio ? `url(#g${i})` : "rgba(247,237,232,.22)"}"/></svg>`;
+    b.addEventListener("click", ev => {
+      const caja = b.getBoundingClientRect();
+      const mitad = (ev.clientX - caja.left) < caja.width * 0.5;
+      const nueva = mitad ? i - 0.5 : i;
+      pintarEstrellas(nueva === calTmp ? 0 : nueva);
+    });
+    cont.appendChild(b);
+  }
+}
+$("#btn-visto").addEventListener("click", e => {
+  const b = e.currentTarget;
+  b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true");
+});
+$("#btn-fav").addEventListener("click", e => {
+  const b = e.currentTarget;
+  b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true");
+});
+
+$("#guardar").addEventListener("click", ()=>{
+  if(!actual) return;
+  const k = id(actual);
+  const txt = $("#texto").value.trim();
+  const visto = $("#btn-visto").getAttribute("aria-pressed") === "true" || calTmp > 0 || !!txt;
+  resenas[k] = { cal: calTmp, txt, visto, fav: $("#btn-fav").getAttribute("aria-pressed")==="true", cuando: Date.now() };
+  escribir(CLAVE_RES, resenas);
+  cerrar(); pintarCatalogo(); soltarPetalo();
+  avisar(calTmp ? `Guardado · ${estrellasTexto(calTmp)}` : "Guardado");
+});
+$("#quitar").addEventListener("click", ()=>{
+  if(!actual) return;
+  delete resenas[id(actual)];
+  escribir(CLAVE_RES, resenas);
+  cerrar(); pintarCatalogo(); avisar("Entrada borrada");
+});
+
+/* ---------------- diario ---------------- */
+function pintarDiario(){
+  const claves = Object.keys(resenas);
+  const calificados = claves.map(k=>resenas[k]).filter(r=>r.cal > 0);
+  const vistos = claves.filter(k=>resenas[k].visto).length;
+  const conTexto = claves.filter(k=>resenas[k].txt).length;
+  const prom = calificados.length
+    ? (calificados.reduce((a,r)=>a+r.cal,0) / calificados.length).toFixed(1).replace(".",",")
+    : "—";
+
+  $("#tarjetas").innerHTML = `
+    <div class="dato"><b>${vistos}</b><span>capítulos vistos</span></div>
+    <div class="dato"><b>${conTexto}</b><span>reseñas escritas</span></div>
+    <div class="dato"><b>${prom}</b><span>promedio de estrellas</span></div>
+    <div class="dato"><b>${claves.filter(k=>resenas[k].fav).length}</b><span>favoritos</span></div>`;
+
+  // distribución
+  const cubos = {};
+  for(let v=0.5; v<=5; v+=0.5) cubos[v]=0;
+  calificados.forEach(r=>{ if(cubos[r.cal]!==undefined) cubos[r.cal]++; });
+  const tope = Math.max(1, ...Object.values(cubos));
+  $("#distribucion").innerHTML = Object.keys(cubos).reverse().map(v=>`
+    <div class="barra">
+      <span style="width:44px;color:var(--oro)">${estrellasTexto(+v)}</span>
+      <span class="riel"><span class="relleno" style="width:${cubos[v]/tope*100}%"></span></span>
+      <span style="width:22px;text-align:right">${cubos[v]||""}</span>
+    </div>`).join("");
+
+  // entradas recientes
+  const cont = $("#lista-diario");
+  const recientes = claves
+    .map(k => ({k, r:resenas[k], c: catalogo.find(c=>id(c)===k)}))
+    .filter(x => x.c)
+    .sort((a,b)=>(b.r.cuando||0)-(a.r.cuando||0))
+    .slice(0,20);
+
+  cont.innerHTML = "";
+  if(!recientes.length){
+    cont.innerHTML = '<div class="nada"><h3>Tu diario está vacío</h3><p>Abre un capítulo y ponle estrellas.</p></div>';
+    return;
+  }
+  for(const x of recientes){
+    const b = nel("button","entrada");
+    const cuadro = nel("div","cuadro");
+    cuadro.style.background = degradado(x.c);
+    if(x.c.img){ const im=new Image(); im.src=IMG+x.c.img; im.alt=""; im.onerror=()=>im.remove(); cuadro.appendChild(im); }
+    b.appendChild(cuadro);
+    const col = nel("div"); col.style.flex="1";
+    col.innerHTML = `<div style="font-weight:500">${x.c.t}</div>
+      <div class="pie" style="margin-top:2px">T${x.c.s} · E${x.c.e}${x.r.cal?` <span class="mini">${estrellasTexto(x.r.cal)}</span>`:""}${x.r.fav?" 🌹":""}</div>`;
+    if(x.r.txt){ const p = nel("p"); p.textContent = x.r.txt; col.appendChild(p); }
+    b.appendChild(col);
+    b.addEventListener("click", ()=>abrir(x.c));
+    cont.appendChild(b);
+  }
+}
+
+/* ---------------- importar de TMDB ---------------- */
+$("#llave").value = leer(CLAVE_KEY, "") || "";
+
+$("#importar").addEventListener("click", async ()=>{
+  const llave = $("#llave").value.trim();
+  const p = $("#progreso");
+  if(!llave){ p.textContent = "Falta la llave de API."; return; }
+  escribir(CLAVE_KEY, llave);
+
+  const btn = $("#importar");
+  btn.disabled = true; btn.textContent = "Trayendo…";
+  const nuevos = [];
+  try{
+    for(let s=1; s<=TEMPORADAS_MAX; s++){
+      p.textContent = `Temporada ${s}… (${nuevos.length} capítulos)`;
+      const url = `https://api.themoviedb.org/3/tv/${SERIE_TMDB}/season/${s}?language=es-MX&api_key=${encodeURIComponent(llave)}`;
+      let res;
+      try{ res = await fetch(url); }
+      catch(err){ throw new Error("red"); }
+      if(res.status === 401) throw new Error("llave");
+      if(!res.ok) continue;                       // temporada inexistente
+      const datos = await res.json();
+      (datos.episodes || []).forEach(ep=>{
+        nuevos.push({
+          s, e: ep.episode_number,
+          t: (ep.name || `Capítulo ${ep.episode_number}`).trim(),
+          o: (ep.overview || "").trim(),
+          d: ep.air_date || "",
+          img: ep.still_path || ""
+        });
+      });
+    }
+    if(!nuevos.length){ p.textContent = "TMDB no devolvió capítulos. Revisa la llave."; return; }
+
+    // conserva las notas de la semilla si el capítulo coincide
+    const notas = {}; SEMILLA.forEach(c => { if(c.n) notas[id(c)] = c.n; });
+    nuevos.forEach(c => { if(notas[id(c)]) c.n = notas[id(c)]; });
+
+    catalogo = nuevos;
+    escribir(CLAVE_CAT, catalogo);
+    llenarTemporadas(); pintarCatalogo();
+    p.textContent = `Listo: ${nuevos.length} capítulos guardados.`;
+    avisar(`${nuevos.length} capítulos cargados`);
+  }catch(err){
+    p.textContent = err.message === "llave"
+      ? "La llave no es válida. Revísala en tu cuenta de TMDB."
+      : "No se pudo conectar con TMDB. Esto funciona al abrir la app desde tu propio sitio, no desde la vista previa.";
+  }finally{
+    btn.disabled = false; btn.textContent = "Traer capítulos";
+  }
+});
+
+/* ---------------- respaldo ---------------- */
+$("#exportar").addEventListener("click", ()=>{
+  $("#respaldo").value = JSON.stringify(resenas);
+  $("#respaldo").select();
+  avisar("Cópialo y guárdalo donde quieras");
+});
+$("#pegar").addEventListener("click", ()=>{
+  const v = $("#respaldo").value.trim();
+  if(!v){ avisar("Pega primero un respaldo"); return; }
+  try{
+    const obj = JSON.parse(v);
+    if(typeof obj !== "object" || Array.isArray(obj)) throw 0;
+    resenas = Object.assign(resenas, obj);
+    escribir(CLAVE_RES, resenas);
+    pintarCatalogo(); avisar("Respaldo restaurado");
+  }catch(e){ avisar("Ese texto no es un respaldo válido"); }
+});
+$("#borrar").addEventListener("click", ()=>{
+  if(!confirm("¿Borrar todas tus calificaciones y el catálogo importado?")) return;
+  [CLAVE_CAT, CLAVE_RES].forEach(k => { try{ localStorage.removeItem(k); }catch(e){} });
+  resenas = {}; catalogo = SEMILLA.slice();
+  llenarTemporadas(); pintarCatalogo(); avisar("Todo borrado");
+});
+
+/* ---------------- arranque ---------------- */
+llenarTemporadas();
+pintarCatalogo();
+
+/* ---------------- PWA ---------------- */
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
