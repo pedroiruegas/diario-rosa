@@ -6,19 +6,23 @@ Un Letterboxd exclusivo para capítulos de **La Rosa de Guadalupe**. Busca capí
 
 ## Qué hace
 
-- 🔎 Buscador por título y sinopsis, con filtro por temporada
-- ⭐ Calificación de media en media estrella, estilo Letterboxd
-- ✍️ Reseñas, marcar como visto y favoritos
-- 📊 Mi diario: capítulos vistos, promedio y cómo calificas
-- 💾 Respaldo de reseñas para copiar y restaurar
-- 📲 Instalable como app (PWA), sin tiendas
+- 👤 Cuentas con usuario y contraseña (sin correo ni datos personales)
+- ⭐ Calificación de media en media estrella, "me gusta", "por ver" y reseñas
+- 📖 Perfil con 4 favoritos, diario por mes, reseñas y listas
+- 🌹 Página de cada capítulo con reseñas de la comunidad y gráfica de calificaciones
+- 🔎 Buscador y filtros por temporada entre más de 2,200 capítulos
+- 📲 Instalable como app (PWA)
+
+## Base de datos
+
+Las cuentas y reseñas viven en [Supabase](https://supabase.com). El esquema está en `supabase.sql`.
 
 ## Actualizar el catálogo
 
 Los capítulos viven en `capitulos.json`. Para regenerarlo con lo más nuevo de TMDB:
 
 ```powershell
-$env:TMDB_KEY="tu_llave_v3"; node fetch-capitulos.mjs
+$env:TMDB_KEY="tu_llave_v3"; node construir-catalogo.mjs
 ```
 
 Luego haz commit y push del `capitulos.json` nuevo.
@@ -31,7 +35,8 @@ Luego haz commit y push del `capitulos.json` nuevo.
 ## Tecnologías
 
 - HTML, CSS y JavaScript puro, en un solo archivo
-- Datos de capítulos: [TMDB](https://www.themoviedb.org)
+- Cuentas y datos: Supabase
+- Datos de capítulos: [Fandom](https://rosa-de-guadalupe.fandom.com/es) y [TMDB](https://www.themoviedb.org)
 - Fuentes: Fraunces + DM Sans vía Google Fonts
 
 > Este producto usa la API de TMDB pero no está avalado ni certificado por TMDB.

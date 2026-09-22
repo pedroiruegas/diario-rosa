@@ -1,4 +1,4 @@
-const CACHE = 'diario-rosa-v2';
+const CACHE = 'diario-rosa-v3';
 const ASSETS = ['./', './index.html', './manifest.json', './capitulos.json',
                 './icons/icon-192.png', './icons/icon-512.png'];
 
@@ -31,8 +31,8 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Imágenes de TMDB y fuentes: caché primero, se guardan al verlas
-  if (url.hostname === 'image.tmdb.org' || url.hostname.includes('fonts.g')) {
+  // Imágenes, fuentes y la librería de Supabase: caché primero. La API de Supabase nunca se cachea.
+  if (url.hostname === 'image.tmdb.org' || url.hostname.includes('fonts.g') || url.hostname === 'cdn.jsdelivr.net') {
     e.respondWith(caches.match(e.request).then(hit =>
       hit || fetch(e.request).then(r => guardar(e.request, r))));
   }
