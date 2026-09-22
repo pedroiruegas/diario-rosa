@@ -197,6 +197,9 @@ a.lamina:hover{box-shadow:inset 0 0 0 2px var(--rosa)}
 .ventana input,.ventana textarea{width:100%;padding:11px 12px;background:#cde;color:#123;border:0;border-radius:4px;font-size:15px}
 .ventana textarea{min-height:130px;resize:vertical;font-family:"Fraunces",serif;line-height:1.5}
 .ventana .pie-v{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap;align-items:center}
+.campo-pass{position:relative}
+.campo-pass input{padding-right:84px}
+.campo-pass .ver{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:#9ab;color:#123;font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:4px}
 .ventana .error{color:#ffc2d4;font-size:13.5px;min-height:20px;margin-top:10px}
 .ventana .cambio{font-size:13.5px;margin-top:14px;text-align:center}
 .ventana .cambio button{text-decoration:underline;color:#fff}
@@ -444,8 +447,17 @@ function abrirAcceso(modo="entrar"){
         <input id="a-u" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
         ${crear ? `<p class="ayuda">De 3 a 20 caracteres: letras minúsculas, números o guion bajo. No se puede cambiar después.</p>` : ""}
         <label for="a-p">Contraseña</label>
-        <input id="a-p" type="password" name="password" autocomplete="${crear ? "new-password" : "current-password"}" required minlength="6">
-        ${crear ? `<p class="ayuda">Mínimo 6 caracteres. No hay forma de recuperarla sin correo, así que guárdala bien.</p>` : ""}
+        <div class="campo-pass">
+          <input id="a-p" type="password" name="password" autocomplete="${crear ? "new-password" : "current-password"}" required minlength="6">
+          <button type="button" class="ver" data-para="a-p" aria-label="Mostrar contraseña">Mostrar</button>
+        </div>
+        ${crear ? `
+        <label for="a-p2">Confirma tu contraseña</label>
+        <div class="campo-pass">
+          <input id="a-p2" type="password" autocomplete="new-password" required minlength="6">
+          <button type="button" class="ver" data-para="a-p2" aria-label="Mostrar contraseña">Mostrar</button>
+        </div>
+        <p class="ayuda">Mínimo 6 caracteres. No hay forma de recuperarla sin correo, así que guárdala bien.</p>` : ""}
         <p class="error" id="a-err"></p>
         <div class="pie-v">
           <button type="button" class="boton gris fino" id="a-cancelar">Cancelar</button>
@@ -453,6 +465,13 @@ function abrirAcceso(modo="entrar"){
         </div>
         <p class="cambio">${crear ? `¿Ya tienes cuenta? <button type="button" id="a-cambio">Entra</button>` : `¿Eres nuevo? <button type="button" id="a-cambio">Crea tu cuenta</button>`}</p>
       </form>`;
+    t.querySelectorAll(".ver").forEach(b => b.onclick = () => {
+      const inp = t.querySelector("#" + b.dataset.para);
+      const mostrar = inp.type === "password";
+      inp.type = mostrar ? "text" : "password";
+      b.textContent = mostrar ? "Ocultar" : "Mostrar";
+      b.setAttribute("aria-label", mostrar ? "Ocultar contraseña" : "Mostrar contraseña");
+    });
     t.querySelector("#a-cancelar").onclick = () => t.remove();
     t.querySelector("#a-cambio").onclick = () => { modo = crear ? "entrar" : "crear"; pintar(); };
     t.querySelector("form").onsubmit = async ev => {
@@ -463,6 +482,7 @@ function abrirAcceso(modo="entrar"){
       const enviar = t.querySelector('button[type=submit]');
       if(!/^[a-z0-9_]{3,20}$/.test(u)){ err.textContent = "El usuario debe tener de 3 a 20 caracteres: minúsculas, números o guion bajo."; return; }
       if(p.length < 6){ err.textContent = "La contraseña necesita al menos 6 caracteres."; return; }
+      if(crear && p !== t.querySelector("#a-p2").value){ err.textContent = "Las contraseñas no coinciden."; return; }
       enviar.disabled = true; err.textContent = "";
       const email = `${u}@${DOMINIO_CUENTAS}`;
       const res = crear
